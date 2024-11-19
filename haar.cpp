@@ -1,5 +1,14 @@
 #include "haar.hpp"
 
+void task1()
+{
+    std::vector<double> img = {211, 215, 218, 220, 252, 216, 198, 142};
+    auto [n, out_img] = get_optimal_n(img, 3.5, 0.1, d2_metric<double>);
+    std::print("\nОтвет:\n", n);
+    std::print("n: {}, итоговое изображение:\n", n);
+    print_vector(out_img);
+}
+
 void task3()
 {
     std::vector<std::vector<double>> m = {
@@ -15,18 +24,9 @@ void task3()
     std::print("Самопроверка: {}", haar2_inverse_std(transformed) == m);
 }
 
-void task1()
-{
-    std::vector<double> img = {211, 215, 218, 220, 252, 216, 198, 142};
-    auto [n, out_img] = get_optimal_n(img, 3.5, 0.1, d2_metric<double>);
-    std::print("\nОтвет:\n", n);
-    std::print("n: {}, итоговое изображение:\n", n);
-    print_vector(out_img);
-}
-
 int main()
 {
-    task1();
+    task3();
 }
 
 
