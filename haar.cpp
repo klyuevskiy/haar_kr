@@ -1,57 +1,32 @@
 #include "haar.hpp"
 
-void metric_res(std::vector<double> v, double target_metric, double eps)
+void task3()
 {
-    int n = get_optimal_n(v, target_metric, eps, d2_metric<double>);
-    if (n != -1)
-    {
-       std::print("Подходящее значение n: {}\n", n);
-    }
-    else
-    {
-        std::print("Не удалось найти значение n: {}\n", n);
-    }
+    std::vector<std::vector<double>> m = {
+        {160, 240, -80, 120},
+        {0, 256, 24, 8},
+        {-88, 100, 64, -4},
+        {30, -18, 220, 16}
+    };
+
+    auto transformed = haar2_std(m);
+    std::print("Ответ:\n");
+    print_matrix(transformed);
+    std::print("Самопроверка: {}", haar2_inverse_std(transformed) == m);
 }
 
-void metrics_search()
+void task1()
 {
-    std::vector<double> data = {1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0};
-        // X - целевая метрика
-    double target_metric = 0.5;
-        // Допустимая погрешность
-    double eps = 0.1;
-    metric_res(data, target_metric, eps);
-    metric_res(data, 0.8, 0.1);
+    std::vector<double> img = {211, 215, 218, 220, 252, 216, 198, 142};
+    auto [n, out_img] = get_optimal_n(img, 3.5, 0.1, d2_metric<double>);
+    std::print("\nОтвет:\n", n);
+    std::print("n: {}, итоговое изображение:\n", n);
+    print_vector(out_img);
 }
 
 int main()
 {
-    //metrics_search();
-
-    std::vector v { 419, 411, 419, 399, 434, 384, 410, 404 };
-    // std::vector<std::vector<int>> m = {
-    //     {4, 6, 10, 12},
-    //     {8, 6, 10, 12},
-    //     {10, 14, 12, 14},
-    //     {12, 14, 14, 14}
-    // };
-
-    std::vector<std::vector<double>> m = {
-        {20, 12, 13, 11},
-        {6, 2, 8, 12},
-        {15, 17, 14, 8},
-        {10, 6, 4, 10}
-    };
-
-    // std::vector<double> img = {249, 247, 243, 241, 180, 184, 235, 237};
-    // auto compressed = compress_image(img, 1. - 0.375);
-    // auto inversed = haar_inverse(compressed);
-    // print_vector(inversed);
-    // std::print("d1: {}, dpsnr: {}\n", d1_metric(img, inversed), dpsnr_metric(img, inversed));
-    //print_matrix(m);
-    assert(haar2_inverse_pyramid(haar2_pyramid(m)) == m);
-    assert(haar2_inverse_std(haar2_std(m)) == m);
-    print_matrix(haar2_inverse_std(haar2_std(m)));
+    task1();
 }
 
 

@@ -11,6 +11,7 @@
 #include <execution>
 #include <type_traits>
 #include <cmath>
+#include <tuple>
 
 template <typename T>
 void print_vector(std::vector<T> const& v)
@@ -276,6 +277,21 @@ T dpsnr_metric(std::vector<T> const& input, std::vector<T> const& output, int ma
     return 10. * std::log10(max_limit * max_limit / result);
 }
 
+template <typename T>
+auto fill_smallest_by_zero(
+    std::vector<T> const &img,
+    std::vector<std::tuple<T, int>>
+    const &sorted_with_indexes, int for_zero)
+{   
+    
+    /* берем значения для обнуления */
+    auto output = img;
+    /* обнуляем по соответсвующим индексам */
+    for(auto [el, index] : std::ranges::views::take(sorted_with_indexes, for_zero))
+        output[index] = 0;
+    return output;
+}
+
 /* найти оптимальное сжатие с заданным качеством */
 template <typename T, typename MetricFunc>
 requires requires(MetricFunc f, std::vector<T> const& img1, std::vector<T> const& img2)
@@ -283,7 +299,8 @@ requires requires(MetricFunc f, std::vector<T> const& img1, std::vector<T> const
     requires std::is_arithmetic_v<T>;
     f(img1, img2);
 }
-int get_optimal_n(
+std::tuple<int, std::vector<T>>
+get_optimal_n(
     std::vector<T> const& img,
     double target_metric_val,
     double eps,
@@ -291,13 +308,22 @@ int get_optimal_n(
 {
     /* после ВП Хаара*/
     auto modified = haar(img);
+    std::vector<std::tuple<T, int>> sorted_with_indexes;
+    std::ranges::transform(modified, std::back_inserter(sorted_with_indexes),
+    [i = 0] (auto element) mutable
+    {
+        return std::make_tuple(std::abs(element), i++);
+    });
+    std::ranges::sort(sorted_with_indexes);
+
+    std::print("afrer haar img:\n");
+    print_vector(modified);
 
     /* начинаем с самого лучшего сжатия */
     for(int i = img.size(); i >= 0; i--)
     {
-        /* обнуляем хвост */
-        auto truncated = modified;
-        std::fill(truncated.begin() + (img.size() - i), truncated.end(), 0);
+        /* обнуляем наименьшие n */
+        auto truncated = fill_smallest_by_zero(modified, sorted_with_indexes, i);
 
         /* восстанваливаем и считаем метрику */
         auto inversed = haar_inverse(truncated);
@@ -306,10 +332,10 @@ int get_optimal_n(
         /* печатаем промежуточные результаты */
         std::print("n = {}, metric = {}\n", i, metric_val);
 
-        if (std::abs(target_metric_val - metric_val) <= eps)
-            return i;
+        if (std::abs(metric_val) <= target_metric_val)
+            return {i, inversed};
     }
-    return -1;
+    return {-1, {}};
 }
 
 #endif
